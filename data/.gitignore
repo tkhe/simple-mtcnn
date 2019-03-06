@@ -1,0 +1,8 @@
+# image files
+*.jpg
+
+# pickle files
+*.pkl
+
+# text files
+*.txt

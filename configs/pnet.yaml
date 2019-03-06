@@ -1,0 +1,10 @@
+MODEL:
+  TYPE: 'pnet'
+  SIZE: 12
+  TRANSFORM: 'rcnn'
+  DEVICE: 'cuda'
+SOLVER:
+  BASE_LR: 0.005
+TRAIN:
+  BATCH_SIZE: 384
+  LOSS_RATIO: (5.0, 1.0)
