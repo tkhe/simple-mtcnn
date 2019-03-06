@@ -6,6 +6,7 @@ from mtcnn.config import cfg
 
 class FocalLoss(nn.Module):
     def __init__(self, alpha, gamma):
+        super(FocalLoss, self).__init__()
         self.alpha = torch.Tensor([1 - alpha, alpha])
         self.gamma = gamma
 
