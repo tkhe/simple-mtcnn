@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
 
-from mtcnn.config import cfg
-
 
 class Loss(object):
     def __init__(self):
@@ -12,8 +10,7 @@ class Loss(object):
     def __call__(self, cls, reg, label, target):
         cls_loss = self.cls_loss(cls, label)
         reg_loss = self.reg_loss(reg, target, label)
-        return cfg.TRAIN.LOSS_RATIO[0] * cls_loss + \
-               cfg.TRAIN.LOSS_RATIO[1] * reg_loss
+        return cls_loss, reg_loss
 
     def cls_loss(self, input, target):
         input = torch.squeeze(input)

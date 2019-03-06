@@ -16,6 +16,7 @@ def do_train(model, data_loader, optimizer, scheduler, device):
     model.train()
 
     loss = Loss()
+    loss_ratio = cfg.TRAIN.LOSS_RATIO
     max_iters = len(data_loader)
 
     for iteration, (im, label, target) in enumerate(data_loader):
@@ -28,7 +29,8 @@ def do_train(model, data_loader, optimizer, scheduler, device):
         target = target.to(device)
 
         cls, reg = model(im)
-        losses = loss(cls, reg, label, target)
+        cls_loss, reg_loss = loss(cls, reg, label, target)
+        losses = loss_ratio[0] * cls_loss + loss_ratio[1] * reg_loss
 
         optimizer.zero_grad()
         losses.backward()
@@ -38,7 +40,9 @@ def do_train(model, data_loader, optimizer, scheduler, device):
             training_state = {
                 'iters': iteration,
                 'lr': optimizer.state_dict()['param_groups'][0]['lr'],
-                'loss': losses.cpu().tolist()
+                'cls_loss': cls_loss.cpu().tolist(),
+                'reg_loss': reg_loss.cpu().tolist(),
+                'total_loss': losses.cpu().tolist()
             }
             log_json_state(training_state)
 
