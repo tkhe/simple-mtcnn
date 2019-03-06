@@ -20,7 +20,7 @@ __C.MODEL.DEVICE = 'cuda'
 
 __C.MODEL.TRANSFORM = 'rcnn'
 
-__C.MODE.FOCAL_LOSS_ON = False
+__C.MODEL.FOCAL_LOSS_ON = False
 
 __C.SOLVER = CN()
 
