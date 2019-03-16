@@ -1,0 +1,8 @@
+MODEL:
+  TYPE: 'pnet'
+  SIZE: 12
+  DEVICE: 'cpu'
+  TRANSFORM: 'rcnn'
+  BBOX_REG_WEIGHTS: (10., 10., 5., 5.)
+  FOCAL_LOSS_ON: False
+

@@ -1,0 +1,81 @@
+import os
+
+from yacs.config import CfgNode as CN
+
+__C = CN()
+
+cfg = __C
+
+__C.ROOT_DIR = os.path.abspath(os.path.join(__file__, '..', '..', '..'))
+
+__C.DATA_DIR = os.path.join(__C.ROOT_DIR, 'data')
+
+__C.OUTPUT_DIR = os.path.join(__C.ROOT_DIR, 'output')
+
+__C.MODEL = CN()
+
+__C.MODEL.TYPE = ''
+
+__C.MODEL.SIZE = -1
+
+__C.MODEL.DEVICE = 'cpu'
+
+__C.MODEL.TRANSFORM = 'rcnn'
+
+__C.MODEL.BBOX_REG_WEIGHTS = (1., 1., 1., 1.)
+
+__C.MODEL.FOCAL_LOSS_ON = False
+
+__C.SOLVER = CN()
+
+__C.SOLVER.BASE_LR = 0.01
+
+__C.SOLVER.MOMENTUM = 0.9
+
+__C.SOLVER.WEIGHT_DECAY = 0.0005
+
+__C.SOLVER.STEPS = (30000,)
+
+__C.SOLVER.GAMMA = 0.01
+
+__C.SOLVER.BASE_LR_FACTOR = 2
+
+__C.SOLVER.WEIGHT_DECAY_BIAS = 0
+
+__C.SOLVER.BIAS_LR_FACTOR = 2
+
+__C.SOLVER.WARMUP_FACTOR = 1.0 / 3
+
+__C.SOLVER.WARMUP_ITERS = 500
+
+__C.TRAIN = CN()
+
+__C.TRAIN.BATCH_SIZE = 192
+
+__C.TRAIN.MAX_ITERS = 70000
+
+__C.TRAIN.LOSS_RATIO = (1.0, 1.0)
+
+__C.TRAIN.SNAPSHOT = 10000
+
+__C.TRAIN.DISPLAY = 50
+
+__C.FOCAL_LOSS = CN()
+
+__C.FOCAL_LOSS.ALPHA = 0.25
+
+__C.FOCAL_LOSS.GAMMA = 2
+
+__C.TEST = CN()
+
+__C.TEST.PNET = CN()
+
+__C.TEST.PNET.THRESHOLD = 0.5
+
+__C.TEST.PNET.NMS = (0.5, 0.5)
+
+__C.TEST.RNET = CN()
+
+__C.TEST.RNET.THRESHOLD = 0.5
+
+__C.TEST.RNET.NMS = 0.5
