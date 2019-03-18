@@ -69,19 +69,21 @@ class Detector(object):
             if boxes.size == 0:
                 continue
             deltas = boxes[:, 5:]
-            boxes[:, 0:4] = box_coder.decode(deltas, boxes[:, 0:4])
+            # boxes[:, 0:4] = box_coder.decode(deltas, boxes[:, 0:4])
             boxes = clip_boxes_to_image(boxes, w, h)
             boxes = filter_small_boxes(boxes)
             keep = nms(boxes[:, :5].astype(np.float32), cfg.TEST.PNET.NMS[0])
             boxes = boxes[keep]
-            boxes = boxes[boxes[:, 4].argsort()[::-1]][:300, :]
+            boxes = boxes[boxes[:, 4].argsort()[::-1]]
             all_boxes.append(boxes[:, :5])
         if len(all_boxes) == 0:
             return None
         all_boxes = np.vstack(all_boxes)
+        # deltas = all_boxes[:, 5:]
+        # all_boxes[:, 0:4] = box_coder.decode(deltas, all_boxes[:, 0:4])
         keep = nms(all_boxes.astype(np.float32), cfg.TEST.PNET.NMS[1])
         all_boxes = all_boxes[keep]
-        all_boxes = all_boxes[all_boxes[:, 4].argsort()[::-1]][:300, :]
+        all_boxes = all_boxes[all_boxes[:, 4].argsort()[::-1]][:2000, :]
         return all_boxes
 
     def detect(self, im):

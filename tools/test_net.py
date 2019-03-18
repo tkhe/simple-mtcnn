@@ -5,9 +5,14 @@ import sys
 
 import torch
 import cv2
+import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
 
 from mtcnn.config import cfg
+from mtcnn.datasets.imdb import get_imdb
+from mtcnn.datasets.voc_eval import do_voc_evaluation
 from mtcnn.modeling.detector import Detector
+from mtcnn.engine.inference import inference
 from mtcnn.modeling.model_builder import build_model
 from mtcnn.utils.logger import setup_logging
 from mtcnn.utils.visualize import visualize_boxes
@@ -24,9 +29,9 @@ def parse_args():
         type=str
     )
     parser.add_argument(
-        '--im',
-        dest='im_file',
-        default=None,
+        '--ds',
+        dest='dataset',
+        default='test',
         type=str
     )
     parser.add_argument(
@@ -57,14 +62,14 @@ def main():
         params = os.path.join(cfg.OUTPUT_DIR, 'pnet', 'model_final.pth')
         pnet.load_state_dict(torch.load(params))
         pnet.eval()
-    
-    detector = Detector(pnet)
 
-    im = cv2.imread(args.im_file)
-    boxes = detector.detect(im)
-    im = visualize_boxes(im, boxes)
-    cv2.imshow('demo', im)
-    cv2.waitKey(0)
+    detector = Detector(pnet)
+    data_dir = os.path.join(cfg.DATA_DIR, args.dataset)
+    imdb = get_imdb(data_dir, args.dataset)
+    predictions = inference(detector, imdb)
+    prec, rec, ap, fp = do_voc_evaluation(args.dataset, predictions)
+    logger.info('ap: {}'.format(ap))
+
 
 
 if __name__ == '__main__':
