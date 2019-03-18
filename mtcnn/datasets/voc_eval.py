@@ -9,9 +9,9 @@ from mtcnn.config import cfg
 def do_voc_evaluation(dataset, predictions, iou=0.5, use_07_metric=True):
     assert dataset in ('train', 'test'), "Unknown dataset: {}".format(dataset)
     if dataset == 'train':
-        gt_file = os.path.join(cfg.DATA_DIR, 'annotation', 'train.txt')
+        gt_file = os.path.join(cfg.DATA_DIR, 'annotations', 'train.txt')
     else:
-        gt_file = os.path.join(cfg.DATA_DIR, 'annotation', 'test.txt')
+        gt_file = os.path.join(cfg.DATA_DIR, 'annotations', 'test.txt')
 
     with open(gt_file, 'r') as f:
         annotations = f.readlines()
@@ -24,8 +24,16 @@ def do_voc_evaluation(dataset, predictions, iou=0.5, use_07_metric=True):
         boxes = np.array(boxes).reshape((-1, 4))
         gt_rois[im_path] = boxes
     
+    pred_rois = list()
+    for im_path, boxes in predictions.items():
+        if boxes is not None:
+            for box in boxes:
+                pred_rois.append([im_path, box[4], box[0], box[1], box[2], box[3]])
+        else:
+            continue
+
     prec, rec, ap, fp = eval_detections_voc(
-        predictions,
+        pred_rois,
         gt_rois,
         iou=iou,
         use_07_metric=use_07_metric

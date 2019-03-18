@@ -14,8 +14,9 @@ box_coder = build_box_coder(cfg.MODEL.TRANSFORM, cfg.MODEL.BBOX_REG_WEIGHTS)
 
 
 class Detector(object):
-    def __init__(self, pnet, stride=2, min_size=12, scale_factor=0.707):
+    def __init__(self, pnet=None, rnet=None, stride=2, min_size=25, scale_factor=0.709):
         self.pnet = pnet
+        self.rnet = rnet
         self.stride = stride
         self.min_size = min_size
         self.scale_factor = scale_factor
@@ -68,23 +69,45 @@ class Detector(object):
             boxes = boxes.cpu().detach().numpy()
             if boxes.size == 0:
                 continue
-            deltas = boxes[:, 5:]
-            # boxes[:, 0:4] = box_coder.decode(deltas, boxes[:, 0:4])
             boxes = clip_boxes_to_image(boxes, w, h)
             boxes = filter_small_boxes(boxes)
             keep = nms(boxes[:, :5].astype(np.float32), cfg.TEST.PNET.NMS[0])
             boxes = boxes[keep]
             boxes = boxes[boxes[:, 4].argsort()[::-1]]
-            all_boxes.append(boxes[:, :5])
+            all_boxes.append(boxes[:300, :])
         if len(all_boxes) == 0:
             return None
         all_boxes = np.vstack(all_boxes)
-        # deltas = all_boxes[:, 5:]
-        # all_boxes[:, 0:4] = box_coder.decode(deltas, all_boxes[:, 0:4])
         keep = nms(all_boxes.astype(np.float32), cfg.TEST.PNET.NMS[1])
         all_boxes = all_boxes[keep]
         all_boxes = all_boxes[all_boxes[:, 4].argsort()[::-1]][:2000, :]
-        return all_boxes
+        return all_boxes[:, :5]
+    
+    def detect_rnet(self, im, dets):
+        batch_size = dets.shape[0]
+        input = torch.zeros((batch_size, 3, 24, 24))
+        for i, box in enumerate(dets):
+            x1, y1, x2, y2 = box
+            im_patch = cv2.resize(im[y1:y2, x1:x2, :], (24, 24))
+            tensor = cv_image_to_tensor(im_patch)
+            input[i] = tensor
+        cls, reg = self.rnet(input)
+        cls = cls[:, 1]
+        cls = cls.cpu().detach().numpy()
+        reg = reg.cpu().detach().numpy()
+        keep = np.where(cls > cfg.TEST.RNET.THRESHOLD)
+        if len(keep) > 0:
+            boxes = dets[keep]
+            boxes[:, 4] = cls
+            reg = reg[keep]
+        else:
+            return None
+        keep = nms(boxes, cfg.TEST.RNET.NMS)
+        boxes = boxes[keep]
+        boxes[:, 0:4] = box_coder.decode(reg, boxes[:, 0:4])
+        return boxes
+
+
 
     def detect(self, im):
         if self.pnet:

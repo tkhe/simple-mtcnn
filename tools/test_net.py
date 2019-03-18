@@ -39,6 +39,11 @@ def parse_args():
         dest='pnet',
         action='store_true'
     )
+    parser.add_argument(
+        '--rnet',
+        dest='rnet',
+        action='store_true'
+    )
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -56,6 +61,16 @@ def main():
     logger.info(pprint.pformat(cfg))
 
     device = torch.device(cfg.MODEL.DEVICE)
+
+    pnet = None
+    rnet = None
+    if args.rnet:
+        args.pnet = True
+        rnet = build_model('rnet')
+        rnet.to(device)
+        params = os.path.join(cfg.OUTPUT_DIR, 'rnet', 'model_final.pth')
+        rnet.load_state_dict(torch.load(params))
+        rnet.eval()
     if args.pnet:
         pnet = build_model('pnet')
         pnet.to(device)
@@ -63,7 +78,7 @@ def main():
         pnet.load_state_dict(torch.load(params))
         pnet.eval()
 
-    detector = Detector(pnet)
+    detector = Detector(pnet=pnet, rnet=rnet)
     data_dir = os.path.join(cfg.DATA_DIR, args.dataset)
     imdb = get_imdb(data_dir, args.dataset)
     predictions = inference(detector, imdb)

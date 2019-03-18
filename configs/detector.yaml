@@ -5,7 +5,7 @@ MODEL:
   BBOX_REG_WEIGHTS: (10., 10., 5., 5.)
 TEST:
   PNET:
-    NMS: (0.5, 0.5)
+    NMS: (0.7, 0.7)
     THRESHOLD: 0.6
   RNET:
     NMS: 0.5
